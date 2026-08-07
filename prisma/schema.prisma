@@ -1,0 +1,246 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+// ─── Auth ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  STAFF
+  SUPERVISOR
+  ADMIN
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(STAFF)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  // Relations
+  supplierPurchasesCreated   SupplierPurchase[]        @relation("PurchaseCreatedBy")
+  supplierPurchasesUpdated   SupplierPurchase[]        @relation("PurchaseUpdatedBy")
+  equipmentCleaningCreated   EquipmentCleaningRecord[] @relation("EqCleanCreatedBy")
+  equipmentCleaningSupervised EquipmentCleaningRecord[] @relation("EqCleanSupervisedBy")
+  generalCleaningCreated     GeneralCleaningRecord[]   @relation("GnCleanCreatedBy")
+  generalCleaningSupervised  GeneralCleaningRecord[]   @relation("GnCleanSupervisedBy")
+  ingredientsCreated         IngredientsChecklist[]    @relation("IngCreatedBy")
+  temperatureReadings        TemperatureReading[]      @relation("TempTakenBy")
+  calibrationRecords         CalibrationRecord[]       @relation("CalibBy")
+  auditLogs                  AuditLog[]
+
+  @@map("users")
+}
+
+// ─── Supplier Module ─────────────────────────────────────────────────────────
+
+model Supplier {
+  id        String   @id @default(cuid())
+  name      String
+  contact   String?
+  location  String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  purchases SupplierPurchase[]
+
+  @@map("suppliers")
+}
+
+model SupplierPurchase {
+  id           String   @id @default(cuid())
+  date         DateTime
+  itemPurchased String
+  supplierId   String
+  photoUrl     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  createdById  String
+  updatedById  String?
+
+  supplier    Supplier @relation(fields: [supplierId], references: [id])
+  createdBy   User     @relation("PurchaseCreatedBy", fields: [createdById], references: [id])
+  updatedBy   User?    @relation("PurchaseUpdatedBy", fields: [updatedById], references: [id])
+
+  @@map("supplier_purchases")
+}
+
+// ─── Equipment Cleaning ───────────────────────────────────────────────────────
+
+enum SupervisionStatus {
+  PENDING
+  APPROVED
+}
+
+model EquipmentCleaningRecord {
+  id           String            @id @default(cuid())
+  date         DateTime
+  equipment    String
+  detergent    String
+  remarks      String?
+  photoUrl     String?
+  status       SupervisionStatus @default(PENDING)
+  supervisedAt DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  cleanedById  String
+  supervisedById String?
+  updatedById  String?
+
+  cleanedBy    User  @relation("EqCleanCreatedBy", fields: [cleanedById], references: [id])
+  supervisedBy User? @relation("EqCleanSupervisedBy", fields: [supervisedById], references: [id])
+
+  @@map("equipment_cleaning_records")
+}
+
+// ─── General Cleaning ─────────────────────────────────────────────────────────
+
+model GeneralCleaningRecord {
+  id           String            @id @default(cuid())
+  date         DateTime
+  area         String
+  detergent    String
+  remarks      String?
+  photoUrl     String?
+  status       SupervisionStatus @default(PENDING)
+  supervisedAt DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  cleanedById  String
+  supervisedById String?
+  updatedById  String?
+
+  cleanedBy    User  @relation("GnCleanCreatedBy", fields: [cleanedById], references: [id])
+  supervisedBy User? @relation("GnCleanSupervisedBy", fields: [supervisedById], references: [id])
+
+  @@map("general_cleaning_records")
+}
+
+// ─── Ingredients Checklist ────────────────────────────────────────────────────
+
+enum SealingIntegrity {
+  OK
+  NOT_OK
+}
+
+model IngredientsChecklist {
+  id               String           @id @default(cuid())
+  date             DateTime
+  ingredient       String
+  expiryDate       DateTime?
+  batchNo          String?
+  sealingIntegrity SealingIntegrity
+  tempReceived     Float?
+  remarks          String?
+  photoUrl         String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  checkedById      String
+  updatedById      String?
+
+  checkedBy User @relation("IngCreatedBy", fields: [checkedById], references: [id])
+
+  @@map("ingredients_checklists")
+}
+
+// ─── Temperature Monitoring ───────────────────────────────────────────────────
+
+enum CheckTime {
+  AM
+  PM
+}
+
+model Device {
+  id      String     @id @default(cuid())
+  name    String
+  type    DeviceType
+  minTemp Float
+  maxTemp Float
+  active  Boolean    @default(true)
+
+  readings     TemperatureReading[]
+  calibrations CalibrationRecord[]
+
+  @@map("devices")
+}
+
+enum DeviceType {
+  FRIDGE
+  FREEZER
+  HOT_HOLDING
+}
+
+model TemperatureReading {
+  id          String    @id @default(cuid())
+  date        DateTime
+  time        CheckTime
+  tempCelsius Float
+  isFlagged   Boolean   @default(false)
+  remarks     String?
+  photoUrl    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deviceId    String
+  takenById   String
+  updatedById String?
+
+  device    Device @relation(fields: [deviceId], references: [id])
+  takenBy   User   @relation("TempTakenBy", fields: [takenById], references: [id])
+
+  @@map("temperature_readings")
+}
+
+model CalibrationRecord {
+  id                String   @id @default(cuid())
+  date              DateTime
+  nextCalibrationDate DateTime
+  createdAt         DateTime @default(now())
+  deviceId          String
+  calibratedById    String
+
+  device       Device @relation(fields: [deviceId], references: [id])
+  calibratedBy User   @relation("CalibBy", fields: [calibratedById], references: [id])
+
+  @@map("calibration_records")
+}
+
+// ─── Cleaning Schedules ───────────────────────────────────────────────────────
+
+enum TargetType {
+  EQUIPMENT
+  AREA
+}
+
+model CleaningSchedule {
+  id            String     @id @default(cuid())
+  targetType    TargetType
+  targetName    String
+  frequencyDays Int        @default(1)
+  active        Boolean    @default(true)
+
+  @@map("cleaning_schedules")
+}
+
+// ─── Audit Log ────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  recordType String
+  recordId   String
+  action     String
+  oldValue   Json?
+  newValue   Json?
+  timestamp  DateTime @default(now())
+  userId     String
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
