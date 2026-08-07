@@ -72,5 +72,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: "/login",
   },
   session: { strategy: "jwt" },
-  secret: process.env.AUTH_SECRET,
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "rdcatering-foodsafety-local-secret-32chars-minimum-needed",
+  trustHost: true,
 });
+
