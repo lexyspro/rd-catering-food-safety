@@ -42,12 +42,12 @@ async function main() {
   });
 
   // ─── Default Admin account ────────────────────────────────────────────────
-  const adminHash = await bcrypt.hash("admin123", 12);
+  const adminHash = await bcrypt.hash("Asiamah.pass123", 12);
   await prisma.user.upsert({
     where: { email: "admin@rdcatering.com" },
     update: {},
     create: {
-      name: "Owner / Admin",
+      name: "Asiamah-Konadu Nana Kwame",
       email: "admin@rdcatering.com",
       passwordHash: adminHash,
       role: Role.ADMIN,
