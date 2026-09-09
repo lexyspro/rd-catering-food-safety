@@ -184,6 +184,34 @@ export async function GET(req: NextRequest) {
           nextDate: r.nextCalibrationDate.toISOString().slice(0, 10),
         });
       });
+    } else if (module === "waste") {
+      sheet.columns = [
+        { header: "Date", key: "date", width: 15 },
+        { header: "Collection Time", key: "time", width: 15 },
+        { header: "Waste Company", key: "company", width: 25 },
+        { header: "Transfer / Docket No", key: "number", width: 25 },
+        { header: "Waste Category", key: "wasteType", width: 25 },
+        { header: "Logged By", key: "loggedBy", width: 20 },
+        { header: "Remarks", key: "remarks", width: 30 },
+      ];
+
+      const data = await prisma.wasteRecord.findMany({
+        where: dateWhere,
+        include: { createdBy: true },
+        orderBy: { date: "desc" },
+      });
+
+      data.forEach((r) => {
+        sheet.addRow({
+          date: r.date.toISOString().slice(0, 10),
+          time: r.time,
+          company: r.company,
+          number: r.number,
+          wasteType: r.wasteType || "",
+          loggedBy: r.createdBy.name,
+          remarks: r.remarks || "",
+        });
+      });
     }
 
     const buffer = await workbook.xlsx.writeBuffer();

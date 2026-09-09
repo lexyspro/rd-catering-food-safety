@@ -12,6 +12,7 @@ import {
   Package,
   Thermometer,
   CalendarCheck2,
+  Trash2,
   Settings,
   Users,
   Download,
@@ -70,6 +71,7 @@ export default function Sidebar({ role, userName, alerts }: SidebarProps) {
     { href: "/records/ingredients", label: "Ingredients", icon: <Package size={16} /> },
     { href: "/records/temperature", label: "Temperature Logs", icon: <Thermometer size={16} /> },
     { href: "/records/calibration", label: "Calibration", icon: <CalendarCheck2 size={16} /> },
+    { href: "/records/waste", label: "Waste Management", icon: <Trash2 size={16} /> },
   ];
 
   const adminItems: NavItem[] = [

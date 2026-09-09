@@ -34,6 +34,7 @@ model User {
   ingredientsCreated         IngredientsChecklist[]    @relation("IngCreatedBy")
   temperatureReadings        TemperatureReading[]      @relation("TempTakenBy")
   calibrationRecords         CalibrationRecord[]       @relation("CalibBy")
+  wasteRecords               WasteRecord[]             @relation("WasteCreatedBy")
   auditLogs                  AuditLog[]
 
   @@map("users")
@@ -244,3 +245,24 @@ model AuditLog {
 
   @@map("audit_logs")
 }
+
+// ─── Waste Management ─────────────────────────────────────────────────────────
+
+model WasteRecord {
+  id          String   @id @default(cuid())
+  date        DateTime
+  time        String
+  company     String
+  number      String
+  wasteType   String?
+  remarks     String?
+  photoUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById String
+
+  createdBy   User     @relation("WasteCreatedBy", fields: [createdById], references: [id])
+
+  @@map("waste_records")
+}
+

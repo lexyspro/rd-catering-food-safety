@@ -314,3 +314,55 @@ export async function createCalibration(formData: FormData) {
   revalidatePath("/records/calibration");
   return { success: true };
 }
+
+// ─── Waste Management ─────────────────────────────────────────────────────────
+
+const wasteSchema = z.object({
+  date: z.string(),
+  time: z.string().min(1),
+  company: z.string().min(1),
+  number: z.string().min(1),
+  wasteType: z.string().optional(),
+  remarks: z.string().optional(),
+  photoUrl: z.string().optional(),
+});
+
+export async function createWasteRecord(formData: FormData) {
+  const session = await auth();
+  if (!session) throw new Error("Unauthorised");
+
+  const parsed = wasteSchema.parse({
+    date: formData.get("date"),
+    time: formData.get("time"),
+    company: formData.get("company"),
+    number: formData.get("number"),
+    wasteType: formData.get("wasteType") || undefined,
+    remarks: formData.get("remarks") || undefined,
+    photoUrl: formData.get("photoUrl") || undefined,
+  });
+
+  const record = await prisma.wasteRecord.create({
+    data: {
+      date: new Date(parsed.date),
+      time: parsed.time,
+      company: parsed.company,
+      number: parsed.number,
+      wasteType: parsed.wasteType,
+      remarks: parsed.remarks,
+      photoUrl: parsed.photoUrl,
+      createdById: session.user!.id!,
+    },
+  });
+
+  await writeAuditLog({
+    recordType: "WasteRecord",
+    recordId: record.id,
+    action: "CREATE",
+    userId: session.user!.id!,
+    newValue: parsed,
+  });
+
+  revalidatePath("/records/waste");
+  return { success: true, id: record.id };
+}
+

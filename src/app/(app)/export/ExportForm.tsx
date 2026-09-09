@@ -42,6 +42,7 @@ export default function ExportForm() {
           <option value="ingredients">Ingredients checklist (Goods received)</option>
           <option value="temperature">Temperature Monitoring Records</option>
           <option value="calibration">Calibration Records</option>
+          <option value="waste">Waste Management Records</option>
         </select>
       </div>
 
