@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { CalendarCheck2 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import CalibrationForm from "./CalibrationForm";
+import DeleteRecordButton from "@/components/DeleteRecordButton";
 
 export const metadata: Metadata = { title: "Calibration Records" };
 
@@ -52,6 +53,7 @@ export default async function CalibrationPage() {
                     <th>Calibrated By</th>
                     <th>Next Calibration Due</th>
                     <th>Status</th>
+                    {role === "ADMIN" && <th>Action</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -68,6 +70,15 @@ export default async function CalibrationPage() {
                             {isOverdue ? "Overdue" : "Calibrated"}
                           </span>
                         </td>
+                        {role === "ADMIN" && (
+                          <td>
+                            <DeleteRecordButton
+                              id={r.id}
+                              recordType="calibration"
+                              recordTitle={`Calibration for ${r.device.name}`}
+                            />
+                          </td>
+                        )}
                       </tr>
                     );
                   })}

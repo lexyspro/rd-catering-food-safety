@@ -366,3 +366,129 @@ export async function createWasteRecord(formData: FormData) {
   return { success: true, id: record.id };
 }
 
+// ─── Record Deletion (Admin Only) ─────────────────────────────────────────────
+
+export type DeletableRecordType =
+  | "temperature"
+  | "equipment-cleaning"
+  | "general-cleaning"
+  | "ingredient"
+  | "calibration"
+  | "waste"
+  | "purchase";
+
+export async function deleteRecord(recordType: DeletableRecordType, id: string) {
+  const session = await auth();
+  if (!session) throw new Error("Unauthorised");
+  const role = session.user?.role as string;
+  if (role !== "ADMIN") {
+    throw new Error("Forbidden: Only administrators can delete records");
+  }
+
+  let oldRecord: any = null;
+  const revalidatePaths: string[] = ["/dashboard"];
+
+  switch (recordType) {
+    case "temperature": {
+      oldRecord = await prisma.temperatureReading.findUniqueOrThrow({ where: { id } });
+      await prisma.temperatureReading.delete({ where: { id } });
+      await writeAuditLog({
+        recordType: "TemperatureReading",
+        recordId: id,
+        action: "DELETE",
+        userId: session.user!.id!,
+        oldValue: oldRecord,
+      });
+      revalidatePaths.push("/records/temperature");
+      break;
+    }
+    case "equipment-cleaning": {
+      oldRecord = await prisma.equipmentCleaningRecord.findUniqueOrThrow({ where: { id } });
+      await prisma.equipmentCleaningRecord.delete({ where: { id } });
+      await writeAuditLog({
+        recordType: "EquipmentCleaningRecord",
+        recordId: id,
+        action: "DELETE",
+        userId: session.user!.id!,
+        oldValue: oldRecord,
+      });
+      revalidatePaths.push("/records/equipment-cleaning");
+      break;
+    }
+    case "general-cleaning": {
+      oldRecord = await prisma.generalCleaningRecord.findUniqueOrThrow({ where: { id } });
+      await prisma.generalCleaningRecord.delete({ where: { id } });
+      await writeAuditLog({
+        recordType: "GeneralCleaningRecord",
+        recordId: id,
+        action: "DELETE",
+        userId: session.user!.id!,
+        oldValue: oldRecord,
+      });
+      revalidatePaths.push("/records/general-cleaning");
+      break;
+    }
+    case "ingredient": {
+      oldRecord = await prisma.ingredientsChecklist.findUniqueOrThrow({ where: { id } });
+      await prisma.ingredientsChecklist.delete({ where: { id } });
+      await writeAuditLog({
+        recordType: "IngredientsChecklist",
+        recordId: id,
+        action: "DELETE",
+        userId: session.user!.id!,
+        oldValue: oldRecord,
+      });
+      revalidatePaths.push("/records/ingredients");
+      break;
+    }
+    case "calibration": {
+      oldRecord = await prisma.calibrationRecord.findUniqueOrThrow({ where: { id } });
+      await prisma.calibrationRecord.delete({ where: { id } });
+      await writeAuditLog({
+        recordType: "CalibrationRecord",
+        recordId: id,
+        action: "DELETE",
+        userId: session.user!.id!,
+        oldValue: oldRecord,
+      });
+      revalidatePaths.push("/records/calibration");
+      break;
+    }
+    case "waste": {
+      oldRecord = await prisma.wasteRecord.findUniqueOrThrow({ where: { id } });
+      await prisma.wasteRecord.delete({ where: { id } });
+      await writeAuditLog({
+        recordType: "WasteRecord",
+        recordId: id,
+        action: "DELETE",
+        userId: session.user!.id!,
+        oldValue: oldRecord,
+      });
+      revalidatePaths.push("/records/waste");
+      break;
+    }
+    case "purchase": {
+      oldRecord = await prisma.supplierPurchase.findUniqueOrThrow({ where: { id } });
+      await prisma.supplierPurchase.delete({ where: { id } });
+      await writeAuditLog({
+        recordType: "SupplierPurchase",
+        recordId: id,
+        action: "DELETE",
+        userId: session.user!.id!,
+        oldValue: oldRecord,
+      });
+      revalidatePaths.push("/records/suppliers");
+      break;
+    }
+    default:
+      throw new Error(`Unsupported record type for deletion: ${recordType}`);
+  }
+
+  for (const path of revalidatePaths) {
+    revalidatePath(path);
+  }
+
+  return { success: true };
+}
+
+

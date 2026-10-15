@@ -5,6 +5,7 @@ import { Wrench } from "lucide-react";
 import { formatDate, formatDateTime } from "@/lib/utils";
 import CleaningForm from "./CleaningForm";
 import SignOffButton from "./SignOffButton";
+import DeleteRecordButton from "@/components/DeleteRecordButton";
 
 export const metadata: Metadata = { title: "Equipment Cleaning" };
 
@@ -79,7 +80,16 @@ export default async function EquipmentCleaningPage() {
                       </td>
                       {role !== "STAFF" && (
                         <td>
-                          {r.status === "PENDING" && <SignOffButton id={r.id} type="equipment" />}
+                          <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                            {r.status === "PENDING" && <SignOffButton id={r.id} type="equipment" />}
+                            {role === "ADMIN" && (
+                              <DeleteRecordButton
+                                id={r.id}
+                                recordType="equipment-cleaning"
+                                recordTitle={`Equipment cleaning log (${r.equipment})`}
+                              />
+                            )}
+                          </div>
                         </td>
                       )}
                     </tr>

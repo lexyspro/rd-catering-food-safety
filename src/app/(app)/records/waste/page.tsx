@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Trash2, FileText, Image as ImageIcon } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import WasteForm from "./WasteForm";
+import DeleteRecordButton from "@/components/DeleteRecordButton";
 
 export const metadata: Metadata = { title: "Waste Management Records" };
 
@@ -62,6 +63,7 @@ export default async function WasteRecordsPage() {
                     <th>Waste Type</th>
                     <th>Logged By</th>
                     <th>Document</th>
+                    {role === "ADMIN" && <th>Action</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -123,6 +125,15 @@ export default async function WasteRecordsPage() {
                           <span style={{ color: "var(--color-text-dim)", fontSize: 11 }}>—</span>
                         )}
                       </td>
+                      {role === "ADMIN" && (
+                        <td>
+                          <DeleteRecordButton
+                            id={r.id}
+                            recordType="waste"
+                            recordTitle={`Waste record for ${r.company}`}
+                          />
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

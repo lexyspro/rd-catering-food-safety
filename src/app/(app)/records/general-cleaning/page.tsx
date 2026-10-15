@@ -5,6 +5,7 @@ import { Layers } from "lucide-react";
 import { formatDate, formatDateTime } from "@/lib/utils";
 import CleaningForm from "../equipment-cleaning/CleaningForm";
 import SignOffButton from "../equipment-cleaning/SignOffButton";
+import DeleteRecordButton from "@/components/DeleteRecordButton";
 
 export const metadata: Metadata = { title: "General Cleaning" };
 
@@ -78,7 +79,16 @@ export default async function GeneralCleaningPage() {
                       </td>
                       {role !== "STAFF" && (
                         <td>
-                          {r.status === "PENDING" && <SignOffButton id={r.id} type="general" />}
+                          <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                            {r.status === "PENDING" && <SignOffButton id={r.id} type="general" />}
+                            {role === "ADMIN" && (
+                              <DeleteRecordButton
+                                id={r.id}
+                                recordType="general-cleaning"
+                                recordTitle={`General cleaning log (${r.area})`}
+                              />
+                            )}
+                          </div>
                         </td>
                       )}
                     </tr>

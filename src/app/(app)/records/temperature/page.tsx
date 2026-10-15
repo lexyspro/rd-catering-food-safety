@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Thermometer } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import TemperatureForm from "./TemperatureForm";
+import DeleteRecordButton from "@/components/DeleteRecordButton";
 
 export const metadata: Metadata = { title: "Temperature Monitoring" };
 
@@ -57,6 +58,7 @@ export default async function TemperaturePage() {
                     <th>Status</th>
                     <th>Logged By</th>
                     <th>Photo</th>
+                    {role === "ADMIN" && <th>Action</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -83,6 +85,15 @@ export default async function TemperaturePage() {
                           <span style={{ color: "var(--color-text-dim)", fontSize: 11 }}>—</span>
                         )}
                       </td>
+                      {role === "ADMIN" && (
+                        <td>
+                          <DeleteRecordButton
+                            id={r.id}
+                            recordType="temperature"
+                            recordTitle={`Temperature reading (${r.device.name} ${r.tempCelsius}°C)`}
+                          />
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

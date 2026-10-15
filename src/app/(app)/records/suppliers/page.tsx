@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Plus, Truck } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import SupplierForm from "./SupplierForm";
+import DeleteRecordButton from "@/components/DeleteRecordButton";
 
 export const metadata: Metadata = { title: "Suppliers" };
 
@@ -58,6 +59,7 @@ export default async function SuppliersPage() {
                     <th>Supplier</th>
                     <th>Logged By</th>
                     <th>Photo</th>
+                    {role === "ADMIN" && <th>Action</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -81,6 +83,15 @@ export default async function SuppliersPage() {
                           <span style={{ color: "var(--color-text-dim)", fontSize: 11 }}>—</span>
                         )}
                       </td>
+                      {role === "ADMIN" && (
+                        <td>
+                          <DeleteRecordButton
+                            id={p.id}
+                            recordType="purchase"
+                            recordTitle={`Purchase of ${p.itemPurchased}`}
+                          />
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Package } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import IngredientsForm from "./IngredientsForm";
+import DeleteRecordButton from "@/components/DeleteRecordButton";
 
 export const metadata: Metadata = { title: "Ingredients Checklist" };
 
@@ -54,6 +55,7 @@ export default async function IngredientsPage() {
                     <th>Sealing</th>
                     <th>Temp °C</th>
                     <th>Checked By</th>
+                    {role === "ADMIN" && <th>Action</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -70,6 +72,15 @@ export default async function IngredientsPage() {
                       </td>
                       <td style={{ fontSize: 12 }}>{r.tempReceived != null ? `${r.tempReceived}°C` : "—"}</td>
                       <td style={{ fontSize: 12 }}>{r.checkedBy.name}</td>
+                      {role === "ADMIN" && (
+                        <td>
+                          <DeleteRecordButton
+                            id={r.id}
+                            recordType="ingredient"
+                            recordTitle={`Ingredient record (${r.ingredient})`}
+                          />
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

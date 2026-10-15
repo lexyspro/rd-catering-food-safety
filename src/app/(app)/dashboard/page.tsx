@@ -14,6 +14,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { formatDate, formatDateTime } from "@/lib/utils";
+import DeleteRecordButton from "@/components/DeleteRecordButton";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -249,6 +250,14 @@ export default async function DashboardPage() {
                       {r.tempCelsius}°C
                     </span>
                     {r.isFlagged && <span className="badge badge-flagged">Flagged</span>}
+                    {role === "ADMIN" && (
+                      <DeleteRecordButton
+                        id={r.id}
+                        recordType="temperature"
+                        recordTitle={`Temperature reading (${r.device.name})`}
+                        compact
+                      />
+                    )}
                   </div>
                 </div>
               ))}
